@@ -9,13 +9,12 @@ use crate::{
     characteristic::Perm,
     pointer,
     transport::http::{ReadResponseObject, Status, WriteObject, WriteResponseObject},
-    Error,
-    Result,
+    Error, Result,
 };
 
 /// `AccessoryDatabase` is a wrapper type holding a list of accessories.
 pub struct AccessoryDatabase {
-    pub accessories: Vec<pointer::Accessory>,
+    pub accessories: Vec<pointer::Accessory<dyn HapAccessory>>,
     event_emitter: pointer::EventEmitter,
 }
 
@@ -29,11 +28,14 @@ impl AccessoryDatabase {
     }
 
     /// Adds an accessory to the `AccessoryDatabase` and returns a pointer to the added accessory.
-    pub fn add_accessory(&mut self, accessory: Box<dyn HapAccessory>) -> Result<pointer::Accessory> {
+    pub fn add_accessory<A: HapAccessory + 'static>(
+        &mut self,
+        accessory: A,
+    ) -> Result<pointer::Accessory<dyn HapAccessory>> {
         let mut accessory = accessory;
         accessory.set_event_emitter_on_characteristics(Some(self.event_emitter.clone()));
 
-        let accessory = Arc::new(Mutex::new(accessory));
+        let accessory = Arc::new(Mutex::new(Box::new(accessory) as Box<dyn HapAccessory>));
         self.accessories.push(accessory.clone());
         // TODO: some error handling here?
 
@@ -41,7 +43,7 @@ impl AccessoryDatabase {
     }
 
     /// Takes a pointer to an accessory and removes the accessory from the `AccessoryDatabase`.
-    pub async fn remove_accessory(&mut self, accessory: &pointer::Accessory) -> Result<()> {
+    pub async fn remove_accessory<A: HapAccessory>(&mut self, accessory: &pointer::Accessory<A>) -> Result<()> {
         let accessory = accessory.lock().await;
         let mut remove = None;
 

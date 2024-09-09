@@ -12,7 +12,7 @@ pub type EventSubscriptions = Arc<Mutex<Vec<(u64, u64)>>>;
 
 pub type AccessoryDatabase = Arc<Mutex<storage::accessory_database::AccessoryDatabase>>;
 
-pub type Accessory = Arc<Mutex<Box<dyn accessory::HapAccessory>>>;
+pub type Accessory<A: accessory::HapAccessory> = Arc<Mutex<Box<A>>>;
 
 pub type Storage = Arc<Mutex<Box<dyn storage::Storage>>>;
 

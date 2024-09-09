@@ -121,7 +121,7 @@ async fn main() -> Result<()> {
     };
 
     let server = IpServer::new(config, storage).await?;
-    server.add_accessory(multi_sensor).await?;
+    server.add_accessory(&multi_sensor).await?;
 
     let handle = server.run_handle();
 

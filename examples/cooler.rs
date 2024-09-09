@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     };
 
     let server = IpServer::new(config, storage).await?;
-    server.add_accessory(cooler).await?;
+    server.add_accessory(&cooler).await?;
 
     let handle = server.run_handle();
 

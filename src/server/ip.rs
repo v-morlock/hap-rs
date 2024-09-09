@@ -14,8 +14,7 @@ use crate::{
     server::Server,
     storage::{accessory_database::AccessoryDatabase, Storage},
     transport::{http::server::Server as HttpServer, mdns::MdnsResponder},
-    BonjourStatusFlag,
-    Result,
+    BonjourStatusFlag, Result,
 };
 
 /// HAP Server via TCP/IP.
@@ -23,7 +22,6 @@ use crate::{
 pub struct IpServer {
     config: pointer::Config,
     storage: pointer::Storage,
-    accessory_database: pointer::AccessoryDatabase,
     http_server: HttpServer,
     mdns_responder: pointer::MdnsResponder,
     aid_cache: Arc<Mutex<Vec<u64>>>,
@@ -203,7 +201,6 @@ impl IpServer {
         let server = IpServer {
             config,
             storage,
-            accessory_database,
             http_server,
             mdns_responder,
             aid_cache,
@@ -231,18 +228,16 @@ impl Server for IpServer {
         Box::pin(handle)
     }
 
-    fn config_pointer(&self) -> pointer::Config { self.config.clone() }
+    fn config_pointer(&self) -> pointer::Config {
+        self.config.clone()
+    }
 
-    fn storage_pointer(&self) -> pointer::Storage { self.storage.clone() }
+    fn storage_pointer(&self) -> pointer::Storage {
+        self.storage.clone()
+    }
 
-    async fn add_accessory<A: HapAccessory + 'static>(&self, accessory: A) -> Result<pointer::Accessory> {
+    async fn add_accessory<A: HapAccessory + 'static>(&self, accessory: &A) -> Result<()> {
         let aid = accessory.get_id();
-
-        let accessory = self
-            .accessory_database
-            .lock()
-            .await
-            .add_accessory(Box::new(accessory))?;
 
         let mut aid_cache = self.aid_cache.lock().await;
         if !aid_cache.contains(&aid) {
@@ -254,17 +249,11 @@ impl Server for IpServer {
             self.storage.lock().await.save_config(&config).await?;
         }
 
-        Ok(accessory)
+        Ok(())
     }
 
-    async fn remove_accessory(&self, accessory: &pointer::Accessory) -> Result<()> {
-        let aid = accessory.lock().await.get_id();
-
-        self.accessory_database
-            .lock()
-            .await
-            .remove_accessory(&accessory)
-            .await?;
+    async fn remove_accessory<A: HapAccessory + 'static>(&self, accessory: &A) -> Result<()> {
+        let aid = accessory.get_id();
 
         let mut aid_cache = self.aid_cache.lock().await;
         if aid_cache.contains(&aid) {

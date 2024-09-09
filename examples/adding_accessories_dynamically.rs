@@ -43,8 +43,8 @@ async fn main() -> Result<()> {
     };
 
     let server = IpServer::new(config, storage).await?;
-    server.add_accessory(bridge).await?;
-    server.add_accessory(lightbulb).await?;
+    server.add_accessory(&bridge).await?;
+    server.add_accessory(&lightbulb).await?;
 
     let handle = server.run_handle();
 
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
                 ..Default::default()
             })?;
 
-            server.add_accessory(lightbulb).await?;
+            server.add_accessory(&lightbulb).await?;
 
             tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         }

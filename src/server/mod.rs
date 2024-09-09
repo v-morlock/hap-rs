@@ -17,9 +17,9 @@ pub trait Server {
     /// Returns a pointer to the [`Storage`](crate::storage::Storage) of the server.
     fn storage_pointer(&self) -> pointer::Storage;
     /// Adds an accessory to the server and returns a pointer to it.
-    async fn add_accessory<A: HapAccessory + 'static>(&self, accessory: A) -> Result<pointer::Accessory>;
+    async fn add_accessory<A: HapAccessory + 'static>(&self, accessory: &A) -> Result<()>;
     /// Takes a pointer to an accessory and removes it from the server.
-    async fn remove_accessory(&self, accessory: &pointer::Accessory) -> Result<()>;
+    async fn remove_accessory<A: HapAccessory + 'static>(&self, accessory: &A) -> Result<()>;
     // /// Every accessory must support a manufacturer-defined mechanism to restore itself to a “factory reset” state
     // where /// all pairing information is erased and restored to factory default settings. This method is doing
     // just that. async fn factory_reset(&mut self) -> Result<()>;

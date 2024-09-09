@@ -83,10 +83,10 @@ async fn main() -> Result<()> {
     };
 
     let server = IpServer::new(config, storage).await?;
-    server.add_accessory(bridge).await?;
-    server.add_accessory(lightbulb_1).await?;
-    server.add_accessory(lightbulb_2).await?;
-    server.add_accessory(lightbulb_3).await?;
+    server.add_accessory(&bridge).await?;
+    server.add_accessory(&lightbulb_1).await?;
+    server.add_accessory(&lightbulb_2).await?;
+    server.add_accessory(&lightbulb_3).await?;
 
     let handle = server.run_handle();
 
